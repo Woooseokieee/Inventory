@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Inventory System</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4;
+    padding: 20px;
+}
+h2 {
+    text-align: center;
+}
+form {
+    background: #fff;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+}
+input, button {
+    padding: 8px;
+    margin: 5px;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+}
+th, td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: center;
+}
+th {
+    background: #eee;
+}
+button {
+    cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<h2>Inventory System</h2>
+
+<form id="inventoryForm">
+    <input type="text" id="itemName" placeholder="Item Name" required>
+    <input type="number" id="quantity" placeholder="Quantity" required>
+    <input type="number" id="price" placeholder="Price" required>
+    <button type="submit">Add Item</button>
+</form>
+
+<table>
+<thead>
+<tr>
+    <th>Item</th>
+    <th>Stock</th>
+    <th>Price</th>
+    <th>Actions</th>
+</tr>
+</thead>
+<tbody id="inventoryTable"></tbody>
+</table>
+
+<script>
+let inventory = JSON.parse(localStorage.getItem("inventory")) || [];
+
+function saveInventory() {
+    localStorage.setItem("inventory", JSON.stringify(inventory));
+}
+
+function renderInventory() {
+    let table = document.getElementById("inventoryTable");
+    table.innerHTML = "";
+
+    inventory.forEach((item, index) => {
+        let row = table.insertRow();
+
+        row.insertCell(0).innerText = item.name;
+        row.insertCell(1).innerText = item.qty;
+        row.insertCell(2).innerText = item.price;
+
+        let actionCell = row.insertCell(3);
+
+        let minusBtn = document.createElement("button");
+        minusBtn.innerText = "-1 Stock";
+        minusBtn.onclick = () => {
+            item.qty -= 1;
+            if (item.qty <= 0) {
+                inventory.splice(index, 1);
+            }
+            saveInventory();
+            renderInventory();
+        };
+
+        actionCell.appendChild(minusBtn);
+    });
+}
+
+document.getElementById("inventoryForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+
+    let name = itemName.value;
+    let qty = parseInt(quantity.value);
+    let price = parseFloat(price.value);
+
+    inventory.push({ name, qty, price });
+    saveInventory();
+    renderInventory();
+    this.reset();
+});
+
+renderInventory();
+</script>
+
+</body>
+</html>
