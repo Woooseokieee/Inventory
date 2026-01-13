@@ -38,6 +38,7 @@ th {
 }
 button {
     cursor: pointer;
+    margin: 2px;
 }
 </style>
 </head>
@@ -81,31 +82,41 @@ function renderInventory() {
 
         row.insertCell(0).innerText = item.name;
         row.insertCell(1).innerText = item.qty;
-        row.insertCell(2).innerText = item.price;
+        row.insertCell(2).innerText = item.price.toFixed(2);
 
         let actionCell = row.insertCell(3);
 
+        // Minus button
         let minusBtn = document.createElement("button");
         minusBtn.innerText = "-1 Stock";
         minusBtn.onclick = () => {
             item.qty -= 1;
-            if (item.qty <= 0) {
-                inventory.splice(index, 1);
-            }
+            if (item.qty <= 0) inventory.splice(index, 1);
+            saveInventory();
+            renderInventory();
+        };
+
+        // Plus button
+        let plusBtn = document.createElement("button");
+        plusBtn.innerText = "+1 Stock";
+        plusBtn.onclick = () => {
+            item.qty += 1;
             saveInventory();
             renderInventory();
         };
 
         actionCell.appendChild(minusBtn);
+        actionCell.appendChild(plusBtn);
     });
 }
 
+// Handle form submit
 document.getElementById("inventoryForm").addEventListener("submit", function(e) {
     e.preventDefault();
 
-    let name = itemName.value;
-    let qty = parseInt(quantity.value);
-    let price = parseFloat(price.value);
+    let name = document.getElementById("itemName").value;
+    let qty = parseInt(document.getElementById("quantity").value);
+    let price = parseFloat(document.getElementById("price").value);
 
     inventory.push({ name, qty, price });
     saveInventory();
@@ -113,6 +124,7 @@ document.getElementById("inventoryForm").addEventListener("submit", function(e) 
     this.reset();
 });
 
+// Initial render
 renderInventory();
 </script>
 
