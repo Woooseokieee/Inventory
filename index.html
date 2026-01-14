@@ -40,7 +40,7 @@ button {
     cursor: pointer;
 }
 .edit-input {
-    width: 60px;
+    width: 70px;
 }
 </style>
 </head>
@@ -51,7 +51,7 @@ button {
 
 <form id="inventoryForm">
     <input type="text" id="itemName" placeholder="Item Name" required>
-    <input type="number" id="quantity" placeholder="Quantity" required>
+    <input type="number" id="quantity" placeholder="Initial Stock" required>
     <input type="number" id="price" placeholder="Price" required>
     <button type="submit">Add Item</button>
 </form>
@@ -76,62 +76,72 @@ function saveInventory() {
 }
 
 function renderInventory() {
-    let table = document.getElementById("inventoryTable");
+    const table = document.getElementById("inventoryTable");
     table.innerHTML = "";
 
     inventory.forEach((item, index) => {
-        let row = table.insertRow();
+        const row = table.insertRow();
 
-        row.insertCell(0).innerText = item.name;
+        // Item name
+        row.insertCell().innerText = item.name;
 
         // Editable stock
-        let stockCell = row.insertCell(1);
-        let stockInput = document.createElement("input");
+        const stockCell = row.insertCell();
+        const stockInput = document.createElement("input");
         stockInput.type = "number";
-        stockInput.value = item.qty;
         stockInput.className = "edit-input";
+        stockInput.value = item.qty;
         stockInput.onchange = () => {
-            item.qty = parseInt(stockInput.value);
-            if (item.qty <= 0) inventory.splice(index, 1);
+            item.qty = parseInt(stockInput.value) || 0;
             saveInventory();
-            renderInventory();
         };
         stockCell.appendChild(stockInput);
 
         // Editable price
-        let priceCell = row.insertCell(2);
-        let priceInput = document.createElement("input");
+        const priceCell = row.insertCell();
+        const priceInput = document.createElement("input");
         priceInput.type = "number";
-        priceInput.value = item.price;
         priceInput.className = "edit-input";
+        priceInput.value = item.price;
         priceInput.onchange = () => {
-            item.price = parseFloat(priceInput.value);
+            item.price = parseFloat(priceInput.value) || 0;
             saveInventory();
         };
         priceCell.appendChild(priceInput);
 
         // Actions
-        let actionCell = row.insertCell(3);
+        const actionCell = row.insertCell();
 
-        let minusBtn = document.createElement("button");
-        minusBtn.innerText = "-1";
-        minusBtn.onclick = () => {
-            item.qty -= 1;
-            if (item.qty <= 0) inventory.splice(index, 1);
+        // Add stock
+        const addBtn = document.createElement("button");
+        addBtn.innerText = "+";
+        addBtn.onclick = () => {
+            item.qty += 1;
             saveInventory();
             renderInventory();
         };
 
-        let deleteBtn = document.createElement("button");
-        deleteBtn.innerText = "Delete";
-        deleteBtn.onclick = () => {
-            inventory.splice(index, 1);
+        // Subtract stock
+        const subBtn = document.createElement("button");
+        subBtn.innerText = "-";
+        subBtn.onclick = () => {
+            if (item.qty > 0) item.qty -= 1;
             saveInventory();
             renderInventory();
         };
 
-        actionCell.appendChild(minusBtn);
-        actionCell.appendChild(deleteBtn);
+        // Remove with confirmation
+        const removeBtn = document.createElement("button");
+        removeBtn.innerText = "Remove";
+        removeBtn.onclick = () => {
+            if (confirm("Are you sure you want to remove this product?")) {
+                inventory.splice(index, 1);
+                saveInventory();
+                renderInventory();
+            }
+        };
+
+        actionCell.append(addBtn, subBtn, removeBtn);
     });
 }
 
