@@ -20,8 +20,8 @@ form {
     border-radius: 5px;
 }
 input, button {
-    padding: 8px;
-    margin: 5px;
+    padding: 6px;
+    margin: 4px;
 }
 table {
     width: 100%;
@@ -38,7 +38,9 @@ th {
 }
 button {
     cursor: pointer;
-    margin: 2px;
+}
+.edit-input {
+    width: 60px;
 }
 </style>
 </head>
@@ -81,14 +83,38 @@ function renderInventory() {
         let row = table.insertRow();
 
         row.insertCell(0).innerText = item.name;
-        row.insertCell(1).innerText = item.qty;
-        row.insertCell(2).innerText = item.price.toFixed(2);
 
+        // Editable stock
+        let stockCell = row.insertCell(1);
+        let stockInput = document.createElement("input");
+        stockInput.type = "number";
+        stockInput.value = item.qty;
+        stockInput.className = "edit-input";
+        stockInput.onchange = () => {
+            item.qty = parseInt(stockInput.value);
+            if (item.qty <= 0) inventory.splice(index, 1);
+            saveInventory();
+            renderInventory();
+        };
+        stockCell.appendChild(stockInput);
+
+        // Editable price
+        let priceCell = row.insertCell(2);
+        let priceInput = document.createElement("input");
+        priceInput.type = "number";
+        priceInput.value = item.price;
+        priceInput.className = "edit-input";
+        priceInput.onchange = () => {
+            item.price = parseFloat(priceInput.value);
+            saveInventory();
+        };
+        priceCell.appendChild(priceInput);
+
+        // Actions
         let actionCell = row.insertCell(3);
 
-        // Minus button
         let minusBtn = document.createElement("button");
-        minusBtn.innerText = "-1 Stock";
+        minusBtn.innerText = "-1";
         minusBtn.onclick = () => {
             item.qty -= 1;
             if (item.qty <= 0) inventory.splice(index, 1);
@@ -96,35 +122,33 @@ function renderInventory() {
             renderInventory();
         };
 
-        // Plus button
-        let plusBtn = document.createElement("button");
-        plusBtn.innerText = "+1 Stock";
-        plusBtn.onclick = () => {
-            item.qty += 1;
+        let deleteBtn = document.createElement("button");
+        deleteBtn.innerText = "Delete";
+        deleteBtn.onclick = () => {
+            inventory.splice(index, 1);
             saveInventory();
             renderInventory();
         };
 
         actionCell.appendChild(minusBtn);
-        actionCell.appendChild(plusBtn);
+        actionCell.appendChild(deleteBtn);
     });
 }
 
-// Handle form submit
 document.getElementById("inventoryForm").addEventListener("submit", function(e) {
     e.preventDefault();
 
-    let name = document.getElementById("itemName").value;
-    let qty = parseInt(document.getElementById("quantity").value);
-    let price = parseFloat(document.getElementById("price").value);
+    inventory.push({
+        name: itemName.value,
+        qty: parseInt(quantity.value),
+        price: parseFloat(price.value)
+    });
 
-    inventory.push({ name, qty, price });
     saveInventory();
     renderInventory();
     this.reset();
 });
 
-// Initial render
 renderInventory();
 </script>
 
